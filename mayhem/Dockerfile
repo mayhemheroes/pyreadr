@@ -6,13 +6,7 @@ RUN apt-get remove gcc-x86-64-linux-gnu && apt autoclean && apt autoremove
 ADD . /src
 WORKDIR /src
 
-ENV CC="/usr/bin/clang"
-ENV CFLAGS="-fsanitize=address,fuzzer-no-link"
-ENV CXX="/usr/bin/clang++"
-ENV CXXFLAGS="-fsanitize=address,fuzzer-no-link"
-RUN python3 -m pip install Cython
-RUN CC="/usr/bin/clang" python3 setup.py install
+RUN CC="/usr/bin/clang" CFLAGS="-fsanitize=fuzzer-no-link" CXX="/usr/bin/clang++" CXXFLAGS="-fsanitize=fuzzer-no-link" python3 -m pip install .
 
-ADD ./mayhem/fuzz_read.py /fuzz_read.py
-
+ENV LD_PRELOAD="$LD_PRELOAD:/usr/local/lib/python3.9/dist-packages/asan_with_fuzzer.so"
 CMD ["/src/mayhem/fuzz_read.py"]
