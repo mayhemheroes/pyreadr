@@ -4,5 +4,5 @@ testsuite:
     - file://mayhem/testsuite
 
 cmds:
-    - cmd: /src/mayhem/fuzz_read.py
+    - cmd: /src/mayhem/fuzz_read.py -rss_limit_mb=0
       libfuzzer: true
