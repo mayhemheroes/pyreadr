@@ -11,18 +11,22 @@ logging.disable(logging.CRITICAL)
 with atheris.instrument_imports():
     import pyreadr
 
-f = tempfile.NamedTemporaryFile()
+# f = tempfile.NamedTemporaryFile()
 
 @atheris.instrument_func
 def TestOneInput(data):
-    f.write(data)
-    f.flush()
+    # f.write(data)
+    # f.flush()
     try:
-        pyreadr.read_r(f.name)
+        with tempfile.NamedTemporaryFile() as f:
+            f.write(data)
+            f.flush()
+            pyreadr.read_r(f.name)
     except (PyreadrError, LibrdataError):
         pass
-    f.seek(0)
-    f.truncate()
+    # f.seek(0)
+    # f.truncate()
+    # f.flush()
 
 def main():
     atheris.Setup(sys.argv, TestOneInput)
