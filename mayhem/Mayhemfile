@@ -5,4 +5,4 @@ testsuite:
 
 cmds:
     - cmd: /src/mayhem/fuzz_read.py
-    libfuzzer: true
+      libfuzzer: true
