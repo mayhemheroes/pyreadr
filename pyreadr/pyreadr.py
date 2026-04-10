@@ -102,7 +102,7 @@ def list_objects(path):
     return parser.object_list
     
     
-def write_rdata(path, df, df_name="dataset", dateformat="%Y-%m-%d", datetimeformat="%Y-%m-%d %H:%M:%S", compress=None):
+def write_rdata(path, df, df_name="dataset", dateformat="%Y-%m-%d", datetimeformat="%Y-%m-%d %H:%M:%S", compress=None, compresslevel=9):
     """
     Write a single pandas data frame to a rdata file.
 
@@ -154,10 +154,10 @@ def write_rdata(path, df, df_name="dataset", dateformat="%Y-%m-%d", datetimeform
 
     filename_bytes = os.path.expanduser(filename_bytes)
 
-    writer.write_r(filename_bytes, file_format, df, df_name, dateformat, datetimeformat, compress)
+    writer.write_r(filename_bytes, file_format, df, df_name, dateformat, datetimeformat, compress, compresslevel)
 
 
-def write_rds(path, df, dateformat="%Y-%m-%d", datetimeformat="%Y-%m-%d %H:%M:%S", compress=None):
+def write_rds(path, df, dateformat="%Y-%m-%d", datetimeformat="%Y-%m-%d %H:%M:%S", compress=None, compresslevel=9):
     """
     Write a single pandas data frame to a rds file.
 
@@ -205,7 +205,7 @@ def write_rds(path, df, dateformat="%Y-%m-%d", datetimeformat="%Y-%m-%d %H:%M:%S
     filename_bytes = os.path.expanduser(filename_bytes)
 
     writer = PyreadrWriter()
-    writer.write_r(filename_bytes, file_format, df, df_name, dateformat, datetimeformat, compress)
+    writer.write_r(filename_bytes, file_format, df, df_name, dateformat, datetimeformat, compress, compresslevel)
 
 def download_file(url, destination_path):
     """

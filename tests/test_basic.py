@@ -349,12 +349,32 @@ class PyReadRBasic(unittest.TestCase):
         self.assertTrue(os.path.isfile(path))
 
     def test_write_rds_gzip(self):
-        
+
         path = os.path.join(self.write_data_folder, "test_gzip.Rds")
         if os.path.isfile(path):
             os.remove(path)
         pyreadr.write_rds(path, self.df_out, compress="gzip")
         self.assertTrue(os.path.isfile(path))
+
+    def test_write_rdata_gzip_compresslevel(self):
+
+        path = os.path.join(self.write_data_folder, "test_gzip_cl6.RData")
+        if os.path.isfile(path):
+            os.remove(path)
+        pyreadr.write_rdata(path, self.df_out, compress="gzip", compresslevel=6)
+        self.assertTrue(os.path.isfile(path))
+        res = pyreadr.read_r(path)
+        self.assertIn('dataset', res)
+
+    def test_write_rds_gzip_compresslevel(self):
+
+        path = os.path.join(self.write_data_folder, "test_gzip_cl6.Rds")
+        if os.path.isfile(path):
+            os.remove(path)
+        pyreadr.write_rds(path, self.df_out, compress="gzip", compresslevel=6)
+        self.assertTrue(os.path.isfile(path))
+        res = pyreadr.read_r(path)
+        self.assertIn(None, res)
 
     def test_altrep_deferred_string(self):
         path = os.path.join(self.basic_data_folder, "altrep_defstr.rds")

@@ -213,6 +213,9 @@ print(dataset2)
 By default the resulting files will be uncompressed, you can activate gzip compression
 by passing the option compress="gzip". This is useful in case you have big files.
 
+You can also control the compression level with the `compresslevel` parameter (1-9).
+The default is 9 (maximum compression, slowest). Lower values like 6 are significantly
+faster with only a small increase in file size.
 
 ```python
 import pyreadr
@@ -226,6 +229,9 @@ pyreadr.write_rdata("test.RData", df, df_name="dataset", compress="gzip")
 
 # write a compressed Rds file
 pyreadr.write_rds("test.Rds", df, compress="gzip")
+
+# write with faster compression (level 6 instead of default 9)
+pyreadr.write_rds("test.Rds", df, compress="gzip", compresslevel=6)
 
 ```
 

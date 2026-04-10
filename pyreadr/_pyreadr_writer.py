@@ -174,7 +174,7 @@ def transform_data(pd_series, dtype, has_missing, dateformat, datetimeformat):
 
 class PyreadrWriter(Writer):
 
-    def compress_file(self, src, dst, compression="gzip"):
+    def compress_file(self, src, dst, compression="gzip", compresslevel=9):
         """
         Compresses a file from src to dst with given compression
         """
@@ -182,8 +182,8 @@ class PyreadrWriter(Writer):
             try:
                 with open(src, "rb") as fin:
                     try:
-                        with gzip.open(dst, "wb") as fout:
-                            shutil.copyfileobj(fin, fout)
+                        with gzip.open(dst, "wb", compresslevel=compresslevel) as fout:
+                            shutil.copyfileobj(fin, fout, length=1024 * 1024)
                     except:
                         raise
             except:
@@ -192,9 +192,9 @@ class PyreadrWriter(Writer):
             raise PyreadrError("compression {0} not implemented!".format(compression))
 
     
-    def write_r(self, path, file_format, df, df_name, dateformat, datetimeformat, compress):
+    def write_r(self, path, file_format, df, df_name, dateformat, datetimeformat, compress, compresslevel=9):
         """
-        write a RData or Rds file. 
+        write a RData or Rds file.
         path: str: path to the file
         file_format: str: rdata or rds
         df: pandas data frame
@@ -202,6 +202,7 @@ class PyreadrWriter(Writer):
         dateformat: str: string to format dates
         datetimeformat: str: string to format datetimes
         compress: str: compression to use, for now only gzip supported.
+        compresslevel: int: compression level for gzip (1-9), default 9.
         """
         
         col_names = df.columns.tolist()
@@ -232,5 +233,5 @@ class PyreadrWriter(Writer):
         self.close()
 
         if compress:
-            self.compress_file(path, original_path, compress)
+            self.compress_file(path, original_path, compress, compresslevel)
             os.remove(path)
