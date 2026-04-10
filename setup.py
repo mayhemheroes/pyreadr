@@ -5,6 +5,7 @@
 
 import setuptools
 import sys
+import os
 
 import platform
 import glob

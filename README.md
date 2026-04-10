@@ -36,7 +36,8 @@ dataframes, take a look to [pysummaries](https://github.com/Genentech/pysummarie
 - [Usage](#usage)
   * [Basic Usage: reading files](#basic-usage--reading-files)
   * [Basic Usage: writing files](#basic-usage--writing-files)
-  * [Reading files from internet](#reading-files-from-internet)
+  * [Reading from file-like objects](#reading-from-file-like-objects)
+  * [Reading files from internet (download to disk)](#reading-files-from-internet-download-to-disk)
   * [Reading selected objects](#reading-selected-objects)
   * [List objects and column names](#list-objects-and-column-names)
   * [Reading timestamps and timezones](#reading-timestamps-and-timezones)
@@ -228,13 +229,27 @@ pyreadr.write_rds("test.Rds", df, compress="gzip")
 
 ```
 
-### Reading files from internet
+### Reading from file-like objects
 
-Librdata, the C backend of pyreadr absolutely needs a file in disk and only a string with the path
-can be passed as argument, therefore you cannot pass an url to pyreadr.read_r. 
+pyreadr can read directly from file-like objects instead of file paths. This is useful for:
+- Reading from in-memory buffers (BytesIO)
+- Streaming from remote sources without saving to disk
 
-In order to help with this limitation, pyreadr provides a funtion download_file which as its name
-suggests downloads a file from an url to disk:
+**Reading from a remote URL:**
+
+```python
+import io
+import urllib.request
+import pyreadr
+
+url = "https://github.com/hadley/nycflights13/blob/master/data/airlines.rda?raw=true"
+response = urllib.request.urlopen(url)
+result = pyreadr.read_r(io.BytesIO(response.read()))
+```
+
+### Reading files from internet (download to disk)
+
+Alternatively, pyreadr provides a function download_file to download a file from an url to disk:
 
 ```python
 import pyreadr
@@ -253,7 +268,7 @@ import pyreadr
 
 url = "https://github.com/hadley/nycflights13/blob/master/data/airlines.rda?raw=true"
 dst_path = "/some/path/on/disk/airlines.rda"
-res = pyreadr.read_r(pyreadr.download_file(url, dst_path), dst_path)
+res = pyreadr.read_r(pyreadr.download_file(url, dst_path))
 ```
 
 
