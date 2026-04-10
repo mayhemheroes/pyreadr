@@ -83,7 +83,8 @@ elif platform.system() == 'Linux':
     libraries.append('bz2')
     libraries.append('lzma')
     #extra_compile_args.append("--std=gnu99")
-    if is_ubuntu():
+    PYREADR_LINK_ICONV = os.environ.get('PYREADR_LINK_ICONV')
+    if PYREADR_LINK_ICONV or is_ubuntu():
         libraries.append('iconv')
 else:
     raise RuntimeError('Unsupported OS')
@@ -110,7 +111,7 @@ https://github.com/ofajardo/pyreadr
 short_description = "Reads/writes R RData and Rds files into/from pandas data frames."
 setup(
     name='pyreadr',
-    version='0.5.4',
+    version='0.5.5',
     ext_modules=cythonize([librdata], force=True),
     packages=["pyreadr"],
     include_package_data=include_package_data,

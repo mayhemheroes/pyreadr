@@ -1,3 +1,6 @@
+# 0.5.5 (github, pypi and conda: 2026.xx.xx)
+* Added env variable PYREADR_LINK_ICONV to force linking iconv on linux, solves #112
+
 # 0.5.4 (github, pypi and conda: 2025.11.25)
 * new pipeline to produce wheels based on cibuildwheel. For windows, mingw64 is used and 
    there is remediation, so that
