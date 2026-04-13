@@ -22,7 +22,9 @@ def is_conda():
     """Check if running in a conda/miniforge environment."""
     if os.environ.get('CONDA_BUILD'):
         return False
-    return os.path.exists(os.path.join(sys.prefix, 'conda-meta'))
+    if not os.path.exists(os.path.join(sys.prefix, 'conda-meta')):
+        return False
+    return (3, 11) <= sys.version_info[:2] <= (3, 13)
 
 librdata_source_files = []
 librdata_source_files += glob.glob('pyreadr/libs/librdata/src/*.c')
