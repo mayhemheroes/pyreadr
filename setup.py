@@ -20,6 +20,8 @@ if cyver < 3:
 
 def is_conda():
     """Check if running in a conda/miniforge environment."""
+    if os.environ.get('CONDA_BUILD'):
+        return False
     return os.path.exists(os.path.join(sys.prefix, 'conda-meta'))
 
 librdata_source_files = []
@@ -92,7 +94,7 @@ https://github.com/ofajardo/pyreadr
 short_description = "Reads/writes R RData and Rds files into/from pandas data frames."
 setup(
     name='pyreadr',
-    version='0.5.5',
+    version='0.5.6',
     ext_modules=cythonize([librdata], force=True),
     packages=["pyreadr"],
     include_package_data=include_package_data,

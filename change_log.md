@@ -1,3 +1,6 @@
+# 0.5.6 (github, pypi and conda: 2026.04.13)
+* fixing setup.py to skip linking iconv for conda builds, to fix conda packaging
+
 # 0.5.5 (github, pypi and conda: 2026.04.13)
 * Added env variable PYREADR_LINK_ICONV to force linking iconv on linux, solves #112
 * Adding reading from file like objects (BytesIO), solves #55

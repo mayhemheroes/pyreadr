@@ -7,6 +7,7 @@ import datetime
 import warnings
 import shutil
 from string import ascii_uppercase
+import urllib
 
 import pandas as pd
 import numpy as np
@@ -406,7 +407,10 @@ class PyReadRBasic(unittest.TestCase):
     def test_read_from_url(self):
         path = os.path.join(self.write_data_folder, "airlines.rda")
         url = "https://github.com/hadley/nycflights13/blob/main/data/airlines.rda?raw=true"
-        res = pyreadr.read_r(pyreadr.download_file(url, path))
+        try:
+            res = pyreadr.read_r(pyreadr.download_file(url, path))
+        except urllib.error.URLError:
+            self.skipTest("Network unavailable or URL unreachable")
         self.assertIsNotNone(res)
 
     # matrices

@@ -51,6 +51,26 @@ class TestHttpIntegration(unittest.TestCase):
             self.assertEqual(len(df), 6, f"Expected 6 rows, got {len(df)}")
             self.assertEqual(len(df.columns), 7, f"Expected 7 columns, got {len(df.columns)}")
 
+    def test_download_file_from_http(self):
+        """Test download_file with local HTTP server, then read the downloaded file."""
+        data_folder = os.path.join(os.path.dirname(__file__), "..", "test_data", "basic")
+        write_folder = os.path.join(os.path.dirname(__file__), "..", "test_data", "write")
+        dest_path = os.path.join(write_folder, "downloaded_one.Rds")
+
+        with http_server(data_folder) as base_url:
+            url = f"{base_url}/one.Rds"
+            result_path = pyreadr.download_file(url, dest_path)
+
+        self.assertEqual(result_path, dest_path)
+        self.assertTrue(os.path.isfile(dest_path))
+
+        res = pyreadr.read_r(dest_path)
+        df = res[None]
+        self.assertEqual(len(df), 6, f"Expected 6 rows, got {len(df)}")
+        self.assertEqual(len(df.columns), 7, f"Expected 7 columns, got {len(df.columns)}")
+
+        os.remove(dest_path)
+
     def test_read_rdata_from_http(self):
         """Test reading RData file from local HTTP server (simulates remote URL)."""
         data_folder = os.path.join(os.path.dirname(__file__), "..", "test_data", "basic")
