@@ -248,7 +248,7 @@ import io
 import urllib.request
 import pyreadr
 
-url = "https://github.com/hadley/nycflights13/blob/master/data/airlines.rda?raw=true"
+url = "https://github.com/hadley/nycflights13/blob/main/data/airlines.rda?raw=true"
 response = urllib.request.urlopen(url)
 result = pyreadr.read_r(io.BytesIO(response.read()))
 ```
@@ -260,7 +260,7 @@ Alternatively, pyreadr provides a function download_file to download a file from
 ```python
 import pyreadr
 
-url = "https://github.com/hadley/nycflights13/blob/master/data/airlines.rda?raw=true"
+url = "https://github.com/hadley/nycflights13/blob/main/data/airlines.rda?raw=true"
 dst_path = "/some/path/on/disk/airlines.rda"
 dst_path_again = pyreadr.download_file(url, dst_path)
 res = pyreadr.read_r(dst_path)
@@ -272,7 +272,7 @@ to pyreadr.read_r directly:
 ```python
 import pyreadr
 
-url = "https://github.com/hadley/nycflights13/blob/master/data/airlines.rda?raw=true"
+url = "https://github.com/hadley/nycflights13/blob/main/data/airlines.rda?raw=true"
 dst_path = "/some/path/on/disk/airlines.rda"
 res = pyreadr.read_r(pyreadr.download_file(url, dst_path))
 ```

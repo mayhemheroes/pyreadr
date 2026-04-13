@@ -1,8 +1,8 @@
-# 0.5.5 (github, pypi and conda: 2026.xx.xx)
+# 0.5.5 (github, pypi and conda: 2026.04.13)
 * Added env variable PYREADR_LINK_ICONV to force linking iconv on linux, solves #112
 * Adding reading from file like objects (BytesIO), solves #55
-* Added compresslevel parameter to write_rdata and write_rds for controlling gzip compression level (1-9)
-* Increased gzip compression buffer size from 16KB to 1MB for better write performance
+* Added compresslevel parameter to write_rdata and write_rds for controlling gzip compression level (1-9) solves #115
+* Increased gzip compression buffer size from 16KB to 1MB for better write performance solves #115
 * replacing is_ubuntu with is_conda in setup.py
 * adapting code to run on pandas 3
 * adding github workflows
