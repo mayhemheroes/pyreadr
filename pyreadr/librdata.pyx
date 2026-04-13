@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 import os.path
 from cython.operator cimport dereference as deref
-from libc.string cimport strlen
+from libc.string cimport strlen, memcpy
 
 from .custom_errors import PyreadrError, LibrdataError
 
@@ -138,6 +138,41 @@ cdef int _handle_value_label(const char *value, int index, void *ctx) noexcept:
         return rdata_error_t.RDATA_ERROR_USER_ABORT
 
 
+cdef object _file_object_ctx = None
+
+cdef int _handle_open_file_object(const char *path, void *io_ctx) noexcept:
+    return 0
+
+cdef int _handle_close_file_object(void *io_ctx) noexcept:
+    return 0
+
+cdef ssize_t _handle_read_file_object(void *buf, size_t nbyte, void *io_ctx) noexcept:
+    global _file_object_ctx
+    cdef ssize_t bytes_read
+    try:
+        data = _file_object_ctx.read(nbyte)
+        bytes_read = len(data)
+        if bytes_read > 0:
+            memcpy(buf, <const char*>data, bytes_read)
+        return bytes_read
+    except:
+        return -1
+
+cdef rdata_off_t _handle_seek_file_object(rdata_off_t offset, rdata_io_flags_t whence, void *io_ctx) noexcept:
+    global _file_object_ctx
+    try:
+        if whence == RDATA_SEEK_SET:
+            py_whence = 0
+        elif whence == RDATA_SEEK_CUR:
+            py_whence = 1
+        else:
+            py_whence = 2
+        _file_object_ctx.seek(offset, py_whence)
+        return _file_object_ctx.tell()
+    except:
+        return -1
+
+
 cdef class Parser:
 
     cdef rdata_parser_t *_this
@@ -146,8 +181,9 @@ cdef class Parser:
     cdef int _var_count
     parse_current_table = True
 
-    cpdef parse(self, path) noexcept:
+    cpdef parse(self, path, file_object=None):
 
+        global _file_object_ctx
         cdef rdata_error_t status
 
         self._this = rdata_parser_init();
@@ -165,6 +201,13 @@ cdef class Parser:
         rdata_set_row_name_handler(self._this, _handle_row_name)
         rdata_set_text_value_handler(self._this, _handle_text_value)
         rdata_set_value_label_handler(self._this, _handle_value_label)
+
+        if file_object is not None:
+            _file_object_ctx = file_object
+            rdata_set_open_handler(self._this, _handle_open_file_object)
+            rdata_set_close_handler(self._this, _handle_close_file_object)
+            rdata_set_read_handler(self._this, _handle_read_file_object)
+            rdata_set_seek_handler(self._this, _handle_seek_file_object)
 
         status = rdata_parse(self._this, path, <void*>self)
         #status = rdata_parse(self._this, path.encode('utf-8'), <void*>self)
@@ -201,13 +244,13 @@ cdef class Parser:
     def handle_value_label(self, name, index):
         pass
 
-    cdef __handle_table(self, const char* name) noexcept:
+    cdef __handle_table(self, const char* name):
         if name == NULL:
             self.handle_table(None)
         else:
             self.handle_table(name)
 
-    cdef __handle_column(self, const char *name, rdata_type_t type, void *data, long count) noexcept:
+    cdef __handle_column(self, const char *name, rdata_type_t type, void *data, long count):
         cdef double *doubles = <double*>data
         cdef int *ints = <int*>data
 
@@ -229,10 +272,10 @@ cdef class Parser:
         data_type = DataType(type)
         self.handle_column(new_name, data_type, array, count)
 
-    cdef __handle_column_name(self, const char *name, int index) noexcept: 
+    cdef __handle_column_name(self, const char *name, int index): 
         self.handle_column_name(name, index)
 
-    cdef __handle_dim(self, const char *name, rdata_type_t datatype, void *data, long count) noexcept:
+    cdef __handle_dim(self, const char *name, rdata_type_t datatype, void *data, long count):
         cdef int *ints = <int*>data
 
         data_type = DataType(datatype)
@@ -249,23 +292,23 @@ cdef class Parser:
             new_name = name
         self.handle_dim(new_name, data_type, array, count)
 
-    cdef __handle_dim_name(self, const char *name, int index) noexcept:
+    cdef __handle_dim_name(self, const char *name, int index):
         if name == NULL:
             new_name = None
         else:
             new_name = name
         self.handle_dim_name(new_name, index)
 
-    cdef __handle_row_name(self, const char *name, int index) noexcept:
+    cdef __handle_row_name(self, const char *name, int index):
         self.handle_row_name(name, index)
 
-    cdef __handle_text_value(self, const char *value, int index) noexcept:
+    cdef __handle_text_value(self, const char *value, int index):
         if value != NULL:
             self.handle_text_value(value, index)
         else:
             self.handle_text_value(np.nan, index)
 
-    cdef __handle_value_label(self, const char *value, int index) noexcept:
+    cdef __handle_value_label(self, const char *value, int index):
         self.handle_value_label(value, index)
 
 

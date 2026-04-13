@@ -40,30 +40,32 @@ def read_r(path, use_objects=None, timezone=None):
     if timezone:
         parser.set_timezone(timezone)
 
-    if hasattr(os, 'fsencode'):
-        try:
-            filename_bytes = os.fsencode(path)
-        except UnicodeError:
-            warnings.warn("file path could not be encoded with %s which is set as your system encoding, trying to encode it as utf-8. Please set your system encoding correctly." % sys.getfilesystemencoding())
-            filename_bytes = os.fsdecode(path).encode("utf-8", "surrogateescape")
+    if hasattr(path, 'read') and hasattr(path, 'seek'):
+        parser.parse(b"", file_object=path)
     else:
-        if sys.version_info[0]>2:
-            if type(path) == str:
-                filename_bytes = path.encode('utf-8')
-            elif type(path) == bytes:
-                filename_bytes = path
-            else:
-                raise PyreadstatError("path must be either str or bytes")
+        if hasattr(os, 'fsencode'):
+            try:
+                filename_bytes = os.fsencode(path)
+            except UnicodeError:
+                warnings.warn("file path could not be encoded with %s which is set as your system encoding, trying to encode it as utf-8. Please set your system encoding correctly." % sys.getfilesystemencoding())
+                filename_bytes = os.fsdecode(path).encode("utf-8", "surrogateescape")
         else:
-            if type(path) not in (str, bytes, unicode):
-                raise PyreadstatError("path must be str, bytes or unicode")
-            filename_bytes = path.encode('utf-8')
+            if sys.version_info[0]>2:
+                if type(path) == str:
+                    filename_bytes = path.encode('utf-8')
+                elif type(path) == bytes:
+                    filename_bytes = path
+                else:
+                    raise PyreadstatError("path must be either str or bytes")
+            else:
+                if type(path) not in (str, bytes, unicode):
+                    raise PyreadstatError("path must be str, bytes or unicode")
+                filename_bytes = path.encode('utf-8')
 
-
-    filename_bytes = os.path.expanduser(filename_bytes)
-    if not os.path.isfile(filename_bytes):
-        raise PyreadrError("File {0} does not exist!".format(filename_bytes))
-    parser.parse(filename_bytes)
+        filename_bytes = os.path.expanduser(filename_bytes)
+        if not os.path.isfile(filename_bytes):
+            raise PyreadrError("File {0} does not exist!".format(filename_bytes))
+        parser.parse(filename_bytes)
 
     result = OrderedDict()
     for table_index, table in enumerate(parser.table_data):
@@ -100,7 +102,7 @@ def list_objects(path):
     return parser.object_list
     
     
-def write_rdata(path, df, df_name="dataset", dateformat="%Y-%m-%d", datetimeformat="%Y-%m-%d %H:%M:%S", compress=None):
+def write_rdata(path, df, df_name="dataset", dateformat="%Y-%m-%d", datetimeformat="%Y-%m-%d %H:%M:%S", compress=None, compresslevel=9):
     """
     Write a single pandas data frame to a rdata file.
 
@@ -152,10 +154,10 @@ def write_rdata(path, df, df_name="dataset", dateformat="%Y-%m-%d", datetimeform
 
     filename_bytes = os.path.expanduser(filename_bytes)
 
-    writer.write_r(filename_bytes, file_format, df, df_name, dateformat, datetimeformat, compress)
+    writer.write_r(filename_bytes, file_format, df, df_name, dateformat, datetimeformat, compress, compresslevel)
 
 
-def write_rds(path, df, dateformat="%Y-%m-%d", datetimeformat="%Y-%m-%d %H:%M:%S", compress=None):
+def write_rds(path, df, dateformat="%Y-%m-%d", datetimeformat="%Y-%m-%d %H:%M:%S", compress=None, compresslevel=9):
     """
     Write a single pandas data frame to a rds file.
 
@@ -203,7 +205,7 @@ def write_rds(path, df, dateformat="%Y-%m-%d", datetimeformat="%Y-%m-%d %H:%M:%S
     filename_bytes = os.path.expanduser(filename_bytes)
 
     writer = PyreadrWriter()
-    writer.write_r(filename_bytes, file_format, df, df_name, dateformat, datetimeformat, compress)
+    writer.write_r(filename_bytes, file_format, df, df_name, dateformat, datetimeformat, compress, compresslevel)
 
 def download_file(url, destination_path):
     """

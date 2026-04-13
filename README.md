@@ -36,7 +36,8 @@ dataframes, take a look to [pysummaries](https://github.com/Genentech/pysummarie
 - [Usage](#usage)
   * [Basic Usage: reading files](#basic-usage--reading-files)
   * [Basic Usage: writing files](#basic-usage--writing-files)
-  * [Reading files from internet](#reading-files-from-internet)
+  * [Reading from file-like objects](#reading-from-file-like-objects)
+  * [Reading files from internet (download to disk)](#reading-files-from-internet-download-to-disk)
   * [Reading selected objects](#reading-selected-objects)
   * [List objects and column names](#list-objects-and-column-names)
   * [Reading timestamps and timezones](#reading-timestamps-and-timezones)
@@ -112,6 +113,10 @@ pip install git+https://github.com/ofajardo/pyreadr.git
 ```
 
 You need a working C compiler and cython. You may also need to install bzlib (on ubuntu install libbz2-dev).
+
+On some Linux distros, iconv needs to be linked at compilation time, while in some other distros it must not 
+be linked. Currently iconv linking happens automatically when building inside a conda/miniforge environment.
+You can force iconv linking with the env variable PYREADR_LINK_ICONV=1 (set to 0, false or no to disable).
 
 In order to run the tests:
 
@@ -208,6 +213,9 @@ print(dataset2)
 By default the resulting files will be uncompressed, you can activate gzip compression
 by passing the option compress="gzip". This is useful in case you have big files.
 
+You can also control the compression level with the `compresslevel` parameter (1-9).
+The default is 9 (maximum compression, slowest). Lower values like 6 are significantly
+faster with only a small increase in file size.
 
 ```python
 import pyreadr
@@ -222,20 +230,37 @@ pyreadr.write_rdata("test.RData", df, df_name="dataset", compress="gzip")
 # write a compressed Rds file
 pyreadr.write_rds("test.Rds", df, compress="gzip")
 
+# write with faster compression (level 6 instead of default 9)
+pyreadr.write_rds("test.Rds", df, compress="gzip", compresslevel=6)
+
 ```
 
-### Reading files from internet
+### Reading from file-like objects
 
-Librdata, the C backend of pyreadr absolutely needs a file in disk and only a string with the path
-can be passed as argument, therefore you cannot pass an url to pyreadr.read_r. 
+pyreadr can read directly from file-like objects instead of file paths. This is useful for:
+- Reading from in-memory buffers (BytesIO)
+- Streaming from remote sources without saving to disk
 
-In order to help with this limitation, pyreadr provides a funtion download_file which as its name
-suggests downloads a file from an url to disk:
+**Reading from a remote URL:**
+
+```python
+import io
+import urllib.request
+import pyreadr
+
+url = "https://github.com/hadley/nycflights13/blob/main/data/airlines.rda?raw=true"
+response = urllib.request.urlopen(url)
+result = pyreadr.read_r(io.BytesIO(response.read()))
+```
+
+### Reading files from internet (download to disk)
+
+Alternatively, pyreadr provides a function download_file to download a file from an url to disk:
 
 ```python
 import pyreadr
 
-url = "https://github.com/hadley/nycflights13/blob/master/data/airlines.rda?raw=true"
+url = "https://github.com/hadley/nycflights13/blob/main/data/airlines.rda?raw=true"
 dst_path = "/some/path/on/disk/airlines.rda"
 dst_path_again = pyreadr.download_file(url, dst_path)
 res = pyreadr.read_r(dst_path)
@@ -247,9 +272,9 @@ to pyreadr.read_r directly:
 ```python
 import pyreadr
 
-url = "https://github.com/hadley/nycflights13/blob/master/data/airlines.rda?raw=true"
+url = "https://github.com/hadley/nycflights13/blob/main/data/airlines.rda?raw=true"
 dst_path = "/some/path/on/disk/airlines.rda"
-res = pyreadr.read_r(pyreadr.download_file(url, dst_path), dst_path)
+res = pyreadr.read_r(pyreadr.download_file(url, dst_path))
 ```
 
 

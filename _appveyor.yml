@@ -73,6 +73,7 @@ test_script:
   - mkdir tmp
   - cd tmp
   - python ../tests/test_basic.py
+  - python ../tests/test_http_integration.py
   - cd ..
 
 

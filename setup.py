@@ -5,6 +5,7 @@
 
 import setuptools
 import sys
+import os
 
 import platform
 import glob
@@ -17,29 +18,9 @@ cyver = int(Cython.__version__.split(".")[0])
 if cyver < 3:
     raise Exception("cython 3.0.0 or newer is required")
 
-def is_ubuntu():
-    """
-    Checks if the current operating system is Ubuntu.
-    
-    This function is safe to run on any OS. It returns False if not on Linux
-    or if the distribution is not Ubuntu.
-    """
-    if not sys.platform.startswith('linux'):
-        return False
-    
-    try:
-        with open('/etc/os-release', 'r', encoding='utf-8') as f:
-            for line in f:
-                if line.strip().startswith('ID='):
-                    # The value might have quotes, which we strip
-                    distro_id = line.split('=', 1)[1].strip().strip('"\'')
-                    if distro_id == 'ubuntu':
-                        return True
-    except FileNotFoundError:
-        # If /etc/os-release doesn't exist, it's not a standard modern Linux.
-        return False
-        
-    return False
+def is_conda():
+    """Check if running in a conda/miniforge environment."""
+    return os.path.exists(os.path.join(sys.prefix, 'conda-meta'))
 
 librdata_source_files = []
 librdata_source_files += glob.glob('pyreadr/libs/librdata/src/*.c')
@@ -83,7 +64,8 @@ elif platform.system() == 'Linux':
     libraries.append('bz2')
     libraries.append('lzma')
     #extra_compile_args.append("--std=gnu99")
-    if is_ubuntu():
+    PYREADR_LINK_ICONV = os.environ.get('PYREADR_LINK_ICONV', '').lower() not in ('', '0', 'false', 'no')
+    if PYREADR_LINK_ICONV or is_conda():
         libraries.append('iconv')
 else:
     raise RuntimeError('Unsupported OS')
@@ -110,7 +92,7 @@ https://github.com/ofajardo/pyreadr
 short_description = "Reads/writes R RData and Rds files into/from pandas data frames."
 setup(
     name='pyreadr',
-    version='0.5.4',
+    version='0.5.5',
     ext_modules=cythonize([librdata], force=True),
     packages=["pyreadr"],
     include_package_data=include_package_data,
