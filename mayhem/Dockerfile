@@ -5,6 +5,7 @@ RUN apt-get update && \
 ADD . /src
 WORKDIR /src
 
+RUN pip3 install "Cython<3"
 RUN CC="/usr/bin/clang" CFLAGS="-fsanitize=address,fuzzer-no-link" CXX="/usr/bin/clang++" CXXFLAGS="-fsanitize=address,fuzzer-no-link" python3 -m pip install .
 
 ENV LD_PRELOAD="$LD_PRELOAD:/usr/local/lib/python3.9/dist-packages/asan_with_fuzzer.so"
