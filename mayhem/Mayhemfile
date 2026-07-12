@@ -1,0 +1,9 @@
+project: pyreadr
+target: read-fuzz
+testsuite:
+    - https://$MAYHEM_DOMAIN/$MAYHEM_PROJECT/$MAYHEM_TARGET/testsuite.tar
+    - file://mayhem/read-fuzz/testsuite
+
+cmds:
+    - cmd: /mayhem/read-fuzz -rss_limit_mb=0
+      libfuzzer: true
